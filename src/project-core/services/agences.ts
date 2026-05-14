@@ -23,6 +23,13 @@ export type AgenceMetrics = {
   revenue: number
 }
 
+function reservationCreatedAtSeconds(value: Reservation['createdAt']): number {
+  if (!value) return 0
+  if (value instanceof Date) return Math.floor(value.getTime() / 1000)
+  if ('seconds' in value && typeof value.seconds === 'number') return value.seconds
+  return 0
+}
+
 function chunk<T>(items: T[], size: number): T[][] {
   const chunks: T[][] = []
   for (let i = 0; i < items.length; i += size) {
@@ -175,7 +182,9 @@ export async function getAgenceReservations(agence: Pick<Agence, 'id' | 'agenceR
     }
   }
 
-  return [...unique.values()].sort((a, b) => (b.createdAt?.seconds ?? 0) - (a.createdAt?.seconds ?? 0))
+  return [...unique.values()].sort(
+    (a, b) => reservationCreatedAtSeconds(b.createdAt) - reservationCreatedAtSeconds(a.createdAt),
+  )
 }
 
 export async function getAgencePaiements(agence: Pick<Agence, 'id' | 'agenceRef'>): Promise<Paiement[]> {

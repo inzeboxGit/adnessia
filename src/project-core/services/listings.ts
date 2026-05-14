@@ -47,9 +47,13 @@ function getListingPrice(category: PartnerListingCategory, data: Record<string, 
 
 function getListingModeration(data: Record<string, unknown>): PartnerListingModeration {
   const moderation = (data.moderation as Partial<PartnerListingModeration> | undefined) || {}
+  const moderationStatus = typeof moderation.status === 'string' && moderation.status.trim()
+    ? moderation.status.trim()
+    : (moderation.approved ? 'approved' : 'pending')
+
   return {
-    approved: Boolean(moderation.approved),
-    status: String(moderation.status || ''),
+    approved: moderationStatus === 'approved' ? true : Boolean(moderation.approved),
+    status: moderationStatus,
     reason: String(moderation.reason || ''),
     reviewedBy: String(moderation.reviewedBy || ''),
     reviewedAt: moderation.reviewedAt,
@@ -133,6 +137,7 @@ export async function approvePartnerListing(category: PartnerListingCategory, id
   await updateDoc(doc(db, collectionName, id), {
     moderation: {
       approved: true,
+      status: 'approved',
       reason: '',
       reviewedBy: user?.uid || '',
       reviewedAt: new Date(),
@@ -147,6 +152,7 @@ export async function rejectPartnerListing(category: PartnerListingCategory, id:
   await updateDoc(doc(db, collectionName, id), {
     moderation: {
       approved: false,
+      status: 'rejected',
       reason: rejectedReason,
       reviewedBy: user?.uid || '',
       reviewedAt: new Date(),

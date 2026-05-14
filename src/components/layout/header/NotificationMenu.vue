@@ -231,7 +231,8 @@ const closeDropdown = () => {
 }
 
 const handleClickOutside = (event: MouseEvent) => {
-  if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
+  const target = event.target instanceof Node ? event.target : null
+  if (dropdownRef.value && !dropdownRef.value.contains(target)) {
     closeDropdown()
   }
 }

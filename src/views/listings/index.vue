@@ -89,7 +89,7 @@
                   <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Prix</p>
                 </th>
                 <th class="px-5 py-3 text-left sm:px-6">
-                  <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Statut</p>
+                  <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Moderation</p>
                 </th>
                 <th class="px-5 py-3 text-left sm:px-6">
                   <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Creee le</p>
@@ -158,7 +158,9 @@
                   <span v-else class="font-semibold text-error-600 dark:text-error-400">✖</span>
                 </td>
                 <td class="px-5 py-4 sm:px-6">
-                  <span class="rounded-full px-2 py-0.5 text-theme-xs font-medium" :class="statusBadgeClass(item.status)">{{ item.status }}</span>
+                  <span class="rounded-full px-2 py-0.5 text-theme-xs font-medium" :class="moderationBadgeClass(item.moderation.status || '')">
+                    {{ moderationLabel(item.moderation.status || '') }}
+                  </span>
                 </td>
                 <td class="px-5 py-4 text-gray-600 text-theme-sm dark:text-gray-400 sm:px-6">{{ formatDate(item.createdAt) }}</td>
                 <td class="px-5 py-4 sm:px-6">
@@ -169,7 +171,7 @@
                     >
                       Voir
                     </router-link>
-                    <button class="rounded-lg bg-success-500 px-2 py-1 text-theme-xs font-medium text-white disabled:opacity-50" :disabled="updatingListingId === item.id || item.status === 'active'" @click="handleApprove(item)">Approuver</button>
+                    <button class="rounded-lg bg-success-500 px-2 py-1 text-theme-xs font-medium text-white disabled:opacity-50" :disabled="updatingListingId === item.id || item.moderation.status === 'approved'" @click="handleApprove(item)">Approuver</button>
                     <button class="rounded-lg bg-error-500 px-2 py-1 text-theme-xs font-medium text-white disabled:opacity-50" :disabled="updatingListingId === item.id" @click="openRejectModal(item)">Rejeter</button>
                     <button class="rounded-lg bg-gray-800 px-2 py-1 text-theme-xs font-medium text-white disabled:opacity-50 dark:bg-gray-600" :disabled="updatingListingId === item.id || item.status === 'trashed'" @click="onTrashClick(item)">Supprimer</button>
                   </div>
@@ -365,6 +367,22 @@ const statusBadgeClass = (status: string) => {
   return 'bg-gray-100 text-gray-600'
 }
 
+const moderationLabel = (status: string) => {
+  if (status === 'approved') return 'Approuve'
+  if (status === 'rejected') return 'Rejete'
+  if (status === 'trashed') return 'Supprime'
+  if (status === 'pending') return 'En attente'
+  return status || 'En attente'
+}
+
+const moderationBadgeClass = (status: string) => {
+  if (status === 'approved') return 'bg-success-50 text-success-600'
+  if (status === 'rejected') return 'bg-error-50 text-error-600'
+  if (status === 'trashed') return 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
+  if (status === 'pending') return 'bg-warning-50 text-warning-600'
+  return 'bg-gray-100 text-gray-600'
+}
+
 const patchLocalListing = (id: string, payload: Partial<PartnerListingListItem>) => {
   items.value = items.value.map((item) => item.id === id ? { ...item, ...payload } : item)
 }
@@ -380,6 +398,7 @@ const handleApprove = async (item: PartnerListingListItem) => {
       moderation: {
         ...item.moderation,
         approved: true,
+        status: 'approved',
         reason: '',
         reviewedAt: new Date(),
       },
@@ -416,6 +435,7 @@ const handleRejectConfirm = async () => {
       moderation: {
         ...selectedListing.value.moderation,
         approved: false,
+        status: 'rejected',
         reason: rejectReason.value.trim(),
         reviewedAt: new Date(),
       },

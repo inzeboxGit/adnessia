@@ -23,6 +23,9 @@
               </button>
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ listing.title }}</h3>
               <span class="rounded-full border px-2 py-0.5 text-xs" :class="categoryBadgeClass(listing.category)">{{ categoryLabel(listing.category) }}</span>
+              <span class="rounded-full px-2 py-0.5 text-xs font-medium" :class="moderationBadgeClass(listing.moderation.status || '')">
+                {{ moderationLabel(listing.moderation.status || '') }}
+              </span>
               <span class="rounded-full px-2 py-0.5 text-xs font-medium" :class="statusBadgeClass(listing.status)">{{ statusLabel(listing.status) }}</span>
               <span v-if="listing.sponsored" class="rounded-full bg-warning-50 px-2 py-0.5 text-xs font-medium text-warning-600">Sponsorisee</span>
               <span v-if="listing.signaled" class="rounded-full bg-error-50 px-2 py-0.5 text-xs font-medium text-error-600">Signalee</span>
@@ -55,7 +58,7 @@
           </div>
 
           <div class="flex shrink-0 flex-col gap-2">
-            <button class="rounded-lg bg-success-500 px-3 py-2 text-sm font-medium text-white disabled:opacity-50" :disabled="updating || listing.status === 'active'" @click="handleApprove">Approuver</button>
+            <button class="rounded-lg bg-success-500 px-3 py-2 text-sm font-medium text-white disabled:opacity-50" :disabled="updating || listing.moderation.status === 'approved'" @click="handleApprove">Approuver</button>
             <button class="rounded-lg bg-error-500 px-3 py-2 text-sm font-medium text-white disabled:opacity-50" :disabled="updating" @click="showReject = true">Rejeter</button>
           </div>
         </div>
@@ -680,6 +683,22 @@ const statusBadgeClass = (status: string) => {
   return 'bg-gray-100 text-gray-600'
 }
 
+const moderationLabel = (status: string) => {
+  if (status === 'approved') return 'Approuve'
+  if (status === 'rejected') return 'Rejete'
+  if (status === 'trashed') return 'Supprime'
+  if (status === 'pending') return 'En attente'
+  return status || 'En attente'
+}
+
+const moderationBadgeClass = (status: string) => {
+  if (status === 'approved') return 'bg-success-50 text-success-600'
+  if (status === 'rejected') return 'bg-error-50 text-error-600'
+  if (status === 'trashed') return 'bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-200'
+  if (status === 'pending') return 'bg-warning-50 text-warning-600'
+  return 'bg-gray-100 text-gray-600'
+}
+
 const handleApprove = async () => {
   if (!listing.value) return
   updating.value = true
@@ -693,6 +712,7 @@ const handleApprove = async () => {
       moderation: {
         ...listing.value.moderation,
         approved: true,
+        status: 'approved',
         reason: '',
         reviewedAt: new Date(),
       },
@@ -715,6 +735,7 @@ const handleReject = async () => {
       moderation: {
         ...listing.value.moderation,
         approved: false,
+        status: 'rejected',
         reason: rejectReason.value.trim(),
         reviewedAt: new Date(),
       },

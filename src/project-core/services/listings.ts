@@ -1,4 +1,4 @@
-import { collection, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore'
+import { collection, deleteDoc, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore'
 import { auth, authReady, db } from '~/config/firebase'
 import type { Agence } from '~/types'
 import type {
@@ -174,6 +174,11 @@ export async function trashPartnerListing(category: PartnerListingCategory, id: 
     },
     status: 'trashed',
   })
+}
+
+export async function deletePartnerListing(category: PartnerListingCategory, id: string): Promise<void> {
+  const collectionName = CATEGORY_COLLECTION_MAP[category]
+  await deleteDoc(doc(db, collectionName, id))
 }
 
 export async function getListingById(category: PartnerListingCategory, id: string): Promise<PartnerListingListItem | null> {

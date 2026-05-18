@@ -173,7 +173,7 @@
                     </router-link>
                     <button class="rounded-lg bg-success-500 px-2 py-1 text-theme-xs font-medium text-white disabled:opacity-50" :disabled="updatingListingId === item.id || item.moderation.status === 'approved'" @click="handleApprove(item)">Approuver</button>
                     <button class="rounded-lg bg-error-500 px-2 py-1 text-theme-xs font-medium text-white disabled:opacity-50" :disabled="updatingListingId === item.id" @click="openRejectModal(item)">Rejeter</button>
-                    <button class="rounded-lg bg-gray-800 px-2 py-1 text-theme-xs font-medium text-white disabled:opacity-50 dark:bg-gray-600" :disabled="updatingListingId === item.id || item.status === 'trashed'" @click="onTrashClick(item)">Supprimer</button>
+                    <button class="rounded-lg bg-gray-800 px-2 py-1 text-theme-xs font-medium text-white disabled:opacity-50 dark:bg-gray-600" :disabled="updatingListingId === item.id" @click="onDeleteClick(item)">Supprimer</button>
                   </div>
                 </td>
               </tr>
@@ -202,7 +202,7 @@ import { computed, onMounted, ref } from 'vue'
 import type { PartnerListingCategory, PartnerListingListItem } from '~/models/listings'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
-import { approvePartnerListing, getPartnerListings, rejectPartnerListing, trashPartnerListing } from '~/services/listings'
+import { approvePartnerListing, deletePartnerListing, getPartnerListings, rejectPartnerListing } from '~/services/listings'
 
 defineOptions({ name: 'ListingsPage' })
 
@@ -449,29 +449,15 @@ const handleRejectConfirm = async () => {
   }
 }
 
-async function onTrashClick(item: PartnerListingListItem) {
+async function onDeleteClick(item: PartnerListingListItem) {
   if (!window.confirm(`Confirmer la suppression de l'annonce "${item.title}" ?`)) return
-
-  const reason = window.prompt('Motif (obligatoire) pour passer cette annonce en trashed:', item.rejectedReason || '')
-  if (!reason || !reason.trim()) return
 
   updatingListingId.value = item.id
   try {
-    await trashPartnerListing(item.category, item.id, reason.trim())
-    patchLocalListing(item.id, {
-      approved: false,
-      status: 'trashed',
-      rejectedReason: reason.trim(),
-      moderation: {
-        ...item.moderation,
-        approved: false,
-        status: 'trashed',
-        reason: reason.trim(),
-        reviewedAt: new Date(),
-      },
-    })
+    await deletePartnerListing(item.category, item.id)
+    items.value = items.value.filter((listing) => listing.id !== item.id)
   } catch {
-    window.alert('Impossible de supprimer cette annonce.')
+    window.alert('Impossible de supprimer definitivement cette annonce.')
   } finally {
     updatingListingId.value = null
   }

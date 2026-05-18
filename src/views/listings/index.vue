@@ -1,9 +1,10 @@
 <template>
   <admin-layout>
-    <page-breadcrumb page-title="Liste des annonces" />
-    <p class="mb-4 text-sm text-gray-500">Vue centralisee des annonces partenaires par categorie.</p>
+    <div class="min-w-0 overflow-x-hidden">
+      <page-breadcrumb page-title="Liste des annonces" />
+      <p class="mb-4 text-sm text-gray-500">Vue centralisee des annonces partenaires par categorie.</p>
 
-    <div class="rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
+      <div class="min-w-0 rounded-2xl border border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-white/[0.03] md:p-6">
       <div class="mb-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-6">
         <input
           v-model="searchQuery"
@@ -68,25 +69,19 @@
         </label>
       </div>
 
-      <div class="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
-        <div class="max-w-full overflow-x-auto custom-scrollbar">
-          <table class="min-w-full">
+      <div class="min-w-0 overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03]">
+        <div class="w-full max-w-full overflow-x-auto overscroll-x-contain custom-scrollbar">
+          <table class="w-max min-w-full">
             <thead>
               <tr class="border-b border-gray-200 dark:border-gray-700">
                 <th class="px-5 py-3 text-left sm:px-6">
                   <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Annonce</p>
                 </th>
                 <th class="px-5 py-3 text-left sm:px-6">
-                  <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Categorie</p>
-                </th>
-                <th class="px-5 py-3 text-left sm:px-6">
                   <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Partenaire</p>
                 </th>
                 <th class="px-5 py-3 text-left sm:px-6">
                   <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Ville</p>
-                </th>
-                <th class="px-5 py-3 text-left sm:px-6">
-                  <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Prix</p>
                 </th>
                 <th class="px-5 py-3 text-left sm:px-6">
                   <p class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Moderation</p>
@@ -101,13 +96,13 @@
             </thead>
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
               <tr v-if="loading" class="border-t border-gray-100 dark:border-gray-800">
-                <td colspan="8" class="px-5 py-10 text-center text-theme-sm text-gray-500 dark:text-gray-400 sm:px-6">Chargement...</td>
+                <td colspan="6" class="px-5 py-10 text-center text-theme-sm text-gray-500 dark:text-gray-400 sm:px-6">Chargement...</td>
               </tr>
               <tr v-else-if="error" class="border-t border-gray-100 dark:border-gray-800">
-                <td colspan="8" class="px-5 py-10 text-center text-theme-sm text-error-600 sm:px-6">{{ error }}</td>
+                <td colspan="6" class="px-5 py-10 text-center text-theme-sm text-error-600 sm:px-6">{{ error }}</td>
               </tr>
               <tr v-else-if="filteredItems.length === 0" class="border-t border-gray-100 dark:border-gray-800">
-                <td colspan="8" class="px-5 py-10 text-center text-theme-sm text-gray-500 dark:text-gray-400 sm:px-6">Aucune annonce trouvee.</td>
+                <td colspan="6" class="px-5 py-10 text-center text-theme-sm text-gray-500 dark:text-gray-400 sm:px-6">Aucune annonce trouvee.</td>
               </tr>
               <tr
                 v-for="item in filteredItems"
@@ -122,39 +117,37 @@
                     </div>
                     <div>
                       <span class="block font-medium text-gray-800 text-theme-sm dark:text-white/90">{{ item.title }}</span>
-                      <span class="block text-gray-500 text-theme-xs dark:text-gray-400">
-                        {{ item.id }}
-                        <span v-if="item.signaled" class="ml-1 font-semibold text-error-600 dark:text-error-400">Signalee</span>
+                      <span class="mt-1 flex items-center gap-1.5 text-theme-xs">
+                        <span
+                          class="inline-flex w-fit rounded-full border px-2 py-0.5 font-medium"
+                          :style="categoryBadgeStyle(item.category)"
+                        >
+                          {{ categoryLabel(item.category) }}
+                        </span>
+                        <span
+                          v-if="listingTypeLabel(item)"
+                          class="rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 font-medium text-gray-600 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300"
+                        >
+                          {{ listingTypeLabel(item) }}
+                        </span>
+                        <span v-if="item.signaled" class="font-semibold text-error-600 dark:text-error-400">Signalee</span>
                       </span>
                     </div>
                   </div>
                 </td>
                 <td class="px-5 py-4 sm:px-6">
-                  <div class="flex flex-col items-center gap-1">
-                    <span
-                      class="w-fit rounded-full border px-2 py-0.5 text-theme-xs font-medium"
-                      :style="categoryBadgeStyle(item.category)"
-                    >
-                      {{ categoryLabel(item.category) }}
-                    </span>
-                    <span
-                      v-if="listingTypeLabel(item)"
-                      class="rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-theme-xs font-medium text-gray-600 dark:border-gray-700 dark:bg-white/[0.03] dark:text-gray-300"
-                    >
-                      {{ listingTypeLabel(item) }}
-                    </span>
-                  </div>
-                </td>
-                <td class="px-5 py-4 sm:px-6">
                   <span class="block font-medium text-gray-700 text-theme-sm dark:text-white/90">{{ item.providerName }}</span>
-                  <!-- <span class="block text-gray-500 text-theme-xs dark:text-gray-400">{{ item.providerId || '—' }}</span> -->
+                  <router-link
+                    v-if="item.providerId"
+                    :to="{ name: 'opportunities.detail', params: { id: item.providerId } }"
+                    class="block text-theme-xs text-brand-600 hover:underline dark:text-brand-400"
+                  >
+                    Voir le partenaire
+                  </router-link>
+                  <span v-else class="block text-gray-500 text-theme-xs dark:text-gray-400">—</span>
                 </td> 
                 <td class="px-5 py-4 text-theme-sm sm:px-6">
                   <span v-if="!isCityMissing(item.city)" class="text-gray-500 dark:text-gray-400">{{ item.city }}</span>
-                  <span v-else class="font-semibold text-error-600 dark:text-error-400">✖</span>
-                </td>
-                <td class="px-5 py-4 text-theme-sm sm:px-6">
-                  <span v-if="!isPriceMissing(item.price)" class="font-medium text-gray-700 dark:text-white/90">{{ formatCurrency(item.price, item.currency) }}</span>
                   <span v-else class="font-semibold text-error-600 dark:text-error-400">✖</span>
                 </td>
                 <td class="px-5 py-4 sm:px-6">
@@ -165,21 +158,64 @@
                 <td class="px-5 py-4 text-gray-600 text-theme-sm dark:text-gray-400 sm:px-6">{{ formatDate(item.createdAt) }}</td>
                 <td class="px-5 py-4 sm:px-6">
                   <div class="flex items-center gap-2 whitespace-nowrap">
-                    <router-link
-                      class="rounded-lg border border-gray-200 px-2 py-1 text-theme-xs text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
-                      :to="{ name: 'listings.detail', params: { category: item.category, id: item.id } }"
-                    >
-                      Voir
-                    </router-link>
-                    <button class="rounded-lg bg-success-500 px-2 py-1 text-theme-xs font-medium text-white disabled:opacity-50" :disabled="updatingListingId === item.id || item.moderation.status === 'approved'" @click="handleApprove(item)">Approuver</button>
-                    <button class="rounded-lg bg-error-500 px-2 py-1 text-theme-xs font-medium text-white disabled:opacity-50" :disabled="updatingListingId === item.id" @click="openRejectModal(item)">Rejeter</button>
-                    <button class="rounded-lg bg-gray-800 px-2 py-1 text-theme-xs font-medium text-white disabled:opacity-50 dark:bg-gray-600" :disabled="updatingListingId === item.id" @click="onDeleteClick(item)">Supprimer</button>
+                    <div class="group relative inline-flex">
+                      <router-link
+                        class="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-white/[0.03]"
+                        :to="{ name: 'listings.detail', params: { category: item.category, id: item.id } }"
+                        aria-label="Voir le detail"
+                      >
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M2 12C3.9 7.9 7.5 5 12 5C16.5 5 20.1 7.9 22 12C20.1 16.1 16.5 19 12 19C7.5 19 3.9 16.1 2 12Z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                          <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+                        </svg>
+                      </router-link>
+                      <span class="pointer-events-none absolute -top-8 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-[10px] text-white opacity-0 transition-opacity duration-0 group-hover:opacity-100 group-focus-within:opacity-100">Voir le detail</span>
+                    </div>
+
+                    <div class="group relative inline-flex">
+                      <button class="rounded-lg bg-success-500 px-2 py-1 text-theme-xs font-medium text-white disabled:opacity-50" :disabled="updatingListingId === item.id || item.moderation.status === 'approved'" @click="handleApprove(item)">Approuver</button>
+                      <span class="pointer-events-none absolute -top-8 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-[10px] text-white opacity-0 transition-opacity duration-0 group-hover:opacity-100 group-focus-within:opacity-100">Valider cette annonce</span>
+                    </div>
+
+                    <div class="group relative inline-flex">
+                      <button
+                        class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-error-500 text-white disabled:opacity-50"
+                        :disabled="updatingListingId === item.id"
+                        @click="openRejectModal(item)"
+                        aria-label="Rejeter"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.8"/>
+                          <path d="M8.5 15.5L15.5 8.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                      </button>
+                      <span class="pointer-events-none absolute -top-8 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-[10px] text-white opacity-0 transition-opacity duration-0 group-hover:opacity-100 group-focus-within:opacity-100">Rejeter avec motif</span>
+                    </div>
+
+                    <div class="group relative inline-flex">
+                      <button
+                        class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-gray-800 text-white disabled:opacity-50 dark:bg-gray-600"
+                        :disabled="updatingListingId === item.id"
+                        @click="onDeleteClick(item)"
+                        aria-label="Supprimer"
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                          <path d="M3 6H21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                          <path d="M8 6V4.5C8 3.7 8.7 3 9.5 3H14.5C15.3 3 16 3.7 16 4.5V6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                          <path d="M6.5 6L7.3 18.2C7.4 19.3 8.3 20.1 9.4 20.1H14.6C15.7 20.1 16.6 19.3 16.7 18.2L17.5 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                          <path d="M10 10V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                          <path d="M14 10V16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                        </svg>
+                      </button>
+                      <span class="pointer-events-none absolute -top-8 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-[10px] text-white opacity-0 transition-opacity duration-0 group-hover:opacity-100 group-focus-within:opacity-100">Supprimer definitivement</span>
+                    </div>
                   </div>
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
+      </div>
       </div>
     </div>
 
@@ -254,8 +290,6 @@ const isCityMissing = (value: string) => {
   return !normalized || normalized === '-' || normalized === '—'
 }
 
-const isPriceMissing = (value?: number | null) => value === null || value === undefined
-
 const getListingDate = (value?: { seconds?: number } | Date | null) => {
   if (!value) return null
   if (value instanceof Date) return value
@@ -318,16 +352,6 @@ const formatDate = (value?: { seconds?: number } | Date | null) => {
     month: 'short',
     year: 'numeric',
   }).format(date)
-}
-
-const formatCurrency = (amount?: number | null, currency = 'MAD') => {
-  if (amount === null || amount === undefined) return '—'
-  return new Intl.NumberFormat('fr-FR', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount)
 }
 
 const categoryLabel = (category: PartnerListingCategory) => {

@@ -1,10 +1,10 @@
 <template>
   <header
-    class="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 lg:border-b"
+    class="sticky top-0 z-99999 flex w-full overflow-x-hidden border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900 lg:border-b"
   >
-    <div class="flex flex-col items-center justify-between grow lg:flex-row lg:px-6">
+    <div class="flex min-w-0 grow flex-col items-center justify-between lg:flex-row lg:px-6">
       <div
-        class="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4"
+        class="flex min-w-0 w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 dark:border-gray-800 sm:gap-4 lg:justify-normal lg:border-b-0 lg:px-0 lg:py-4"
       >
         <button
           @click="handleToggle"
@@ -72,7 +72,7 @@
 
       <div
         :class="[isApplicationMenuOpen ? 'flex' : 'hidden']"
-        class="items-center justify-between w-full gap-4 px-5 py-4 shadow-theme-md lg:flex lg:justify-end lg:px-0 lg:shadow-none"
+        class="min-w-0 w-full items-center justify-between gap-4 px-5 py-4 shadow-theme-md lg:flex lg:justify-end lg:px-0 lg:shadow-none"
       >
         <div class="flex items-center gap-2 2xsm:gap-3">
           <ThemeToggler />

@@ -27,6 +27,16 @@ export type CentralizedReservationStats = {
   providers: number
 }
 
+export type ReservationDetailContext = {
+  reservation: Reservation
+  providerId: string
+  providerName: string
+  clientId: string
+  clientName: string
+  payments: Paiement[]
+  image: string | null
+}
+
 const agenceName = (agence: Agence) => {
   return agence.nom || agence.name || `${agence.firstName ?? ''} ${agence.lastName ?? ''}`.trim() || '—'
 }
@@ -153,6 +163,57 @@ export async function getReservationById(id: string): Promise<Reservation | null
   const snap = await getDoc(doc(db, 'reservations', id))
   if (!snap.exists()) return null
   return mapReservation({ id: snap.id, ...snap.data() })
+}
+
+export async function getReservationDetailContext(id: string): Promise<ReservationDetailContext | null> {
+  const reservation = await getReservationById(id)
+  if (!reservation) return null
+
+  const providerId = String(reservation.agenceRef || '')
+  const clientId = String(((reservation as unknown as Record<string, unknown>).clientId) || reservation.userId || '')
+
+  const [agencesSnap, customersSnap, paymentsSnap, image] = await Promise.all([
+    getDocs(collection(db, 'agences')),
+    getDocs(collection(db, 'customers')),
+    getDocs(query(collection(db, 'paiements'), where('reservationId', '==', id))),
+    getReservationElementImage(reservation),
+  ])
+
+  const providerName = (() => {
+    for (const agenceDoc of agencesSnap.docs) {
+      const agence = { id: agenceDoc.id, ...agenceDoc.data() } as Agence
+      const keys = [agenceDoc.id, agence.uid, agence.agenceRef].filter(Boolean) as string[]
+      if (providerId && keys.includes(providerId)) return agenceName(agence)
+    }
+    return '—'
+  })()
+
+  const clientName = (() => {
+    for (const customerDoc of customersSnap.docs) {
+      const customer = { id: customerDoc.id, ...customerDoc.data() } as Customer & Record<string, unknown>
+      const keys = [
+        customerDoc.id,
+        customer.uid,
+        asNonEmptyString(customer.clientId),
+        asNonEmptyString(customer.customerId),
+        asNonEmptyString(customer.userId),
+      ].filter((value): value is string => Boolean(value))
+      if (clientId && keys.includes(clientId)) return customerName(customer)
+    }
+    return '—'
+  })()
+
+  const payments = paymentsSnap.docs.map((paymentDoc) => ({ id: paymentDoc.id, ...paymentDoc.data() } as Paiement))
+
+  return {
+    reservation,
+    providerId,
+    providerName,
+    clientId,
+    clientName,
+    payments,
+    image,
+  }
 }
 
 export async function getReservationsByIds(ids: string[]): Promise<Map<string, Reservation>> {

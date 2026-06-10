@@ -280,6 +280,16 @@ const menuGroups: MenuGroup[] = [
           { name: "Prestataire en attente", path: "/opportunities/pending" },
         ],
       },
+          {
+            icon: UserCircleIcon,
+            name: "Chauffeurs",
+            subItems: [{ name: "Liste des Chauffeurs", path: "/drivers" }],
+          },
+      {
+        icon: CalenderIcon,
+        name: "Gestion courses",
+        subItems: [{ name: "Demandes de course", path: "/ride-requests" }],
+      },
       {
         icon: BoxIcon,
         name: "Listings",

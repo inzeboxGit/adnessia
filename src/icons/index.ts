@@ -11,6 +11,7 @@ import ChevronDownIcon from "./ChevronDownIcon.vue";
 import HorizontalDots from "./HorizontalDots.vue";
 import PlugInIcon from "./PlugInIcon.vue";
 import PageIcon from "./PageIcon.vue";
+import EyeIcon from "./EyeIcon.vue";
 import SuccessIcon from "./SuccessIcon.vue";
 import ErrorIcon from "./ErrorIcon.vue";
 import InfoIcon from "./InfoIcon.vue";
@@ -65,6 +66,7 @@ export {
   BoxIcon,
   ChevronRightIcon,
   GridIcon,
+  EyeIcon,
   BoxCubeIcon,
   CalenderIcon,
   UserCircleIcon,

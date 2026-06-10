@@ -90,6 +90,30 @@ const router = createRouter({
       },
     },
     {
+      path: '/drivers',
+      name: 'Drivers',
+      component: () => import('../views/drivers/Drivers.vue'),
+      meta: {
+        title: 'Chauffeurs',
+      },
+    },
+    {
+      path: '/ride-requests',
+      name: 'ride-requests',
+      component: () => import('../views/rides/RideRequests.vue'),
+      meta: {
+        title: 'Gestion des courses',
+      },
+    },
+    {
+      path: '/drivers/:id',
+      name: 'drivers.detail',
+      component: () => import('../views/drivers/detail.vue'),
+      meta: {
+        title: 'Detail Chauffeur',
+      },
+    },
+    {
       path: '/opportunities/pending',
       name: 'opportunities.pending',
       component: () => import('../views/partenaires/pending.vue'),
@@ -111,6 +135,14 @@ const router = createRouter({
       component: () => import('../views/reservations/Reservations.vue'),
       meta: {
         title: 'Reservations',
+      },
+    },
+    {
+      path: '/reservations/:id',
+      name: 'reservations.detail',
+      component: () => import('../views/reservations/detail.vue'),
+      meta: {
+        title: 'Détail réservation',
       },
     },
     {

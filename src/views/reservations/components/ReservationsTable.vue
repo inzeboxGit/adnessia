@@ -53,22 +53,25 @@
             <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Montant</th>
             <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Date</th>
             <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Statut</th>
+            <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Action</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 bg-white">
           <tr v-if="loading">
-            <td colspan="8" class="px-3 py-10 text-center text-sm text-gray-500">Chargement...</td>
+            <td colspan="9" class="px-3 py-10 text-center text-sm text-gray-500">Chargement...</td>
           </tr>
           <tr v-else-if="error">
-            <td colspan="8" class="px-3 py-10 text-center text-sm text-error-600">{{ error }}</td>
+            <td colspan="9" class="px-3 py-10 text-center text-sm text-error-600">{{ error }}</td>
           </tr>
           <tr v-else-if="paginatedReservations.length === 0">
-            <td colspan="8" class="px-3 py-10 text-center text-sm text-gray-500">Aucune reservation trouvee.</td>
+            <td colspan="9" class="px-3 py-10 text-center text-sm text-gray-500">Aucune reservation trouvee.</td>
           </tr>
           <tr v-for="item in paginatedReservations" :key="item.id" class="hover:bg-gray-50/80">
             <td class="px-3 py-3">
               <div class="min-w-[220px]">
-                <p class="text-sm font-semibold text-gray-800">{{ item.title }}</p>
+                <router-link :to="{ name: 'reservations.detail', params: { id: item.id } }" class="text-sm font-semibold text-brand-600 hover:underline">
+                  {{ item.title }}
+                </router-link>
                 <p class="text-xs text-gray-500">{{ item.raw.reference || item.id }}</p>
               </div>
             </td>
@@ -79,6 +82,14 @@
             <td class="px-3 py-3 text-sm font-semibold text-gray-700">{{ formatCurrency(item.amount, item.currency) }}</td>
             <td class="px-3 py-3 text-sm text-gray-600">{{ formatDate(item.date) }}</td>
             <td class="px-3 py-3"><span class="rounded-full px-2 py-0.5 text-xs font-medium" :class="statusBadgeClass(item.status)">{{ statusLabel(item.status) }}</span></td>
+            <td class="px-3 py-3">
+              <router-link
+                :to="{ name: 'reservations.detail', params: { id: item.id } }"
+                class="inline-flex rounded-lg border border-gray-200 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50"
+              >
+                Voir
+              </router-link>
+            </td>
           </tr>
         </tbody>
       </table>

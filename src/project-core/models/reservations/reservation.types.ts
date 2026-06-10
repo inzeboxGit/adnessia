@@ -29,6 +29,7 @@ export interface ReservationBase {
   reference: string
   status: ReservationStatus
   userId: string
+  clientId?: string | null
   agenceRef?: string | null
   elementId?: string | null
   elementTitre?: string | null
@@ -42,12 +43,24 @@ export interface ReservationBase {
   updatedAt?: ReservationDateValue
   dateDebut?: ReservationDateValue
   dateFin?: ReservationDateValue
+  datePaiement?: ReservationDateValue
   image?: string | null
   note?: number | null
 }
 
 export interface ActivityReservation extends ReservationBase {
   type: 'ACTIVITE'
+  heure?: string | null
+  personnes?: number | null
+  items?: Array<{
+    date?: ReservationDateValue
+    heure?: string
+    personnes?: number
+    prixParPersonne?: number
+    productId?: string
+    titre?: string
+    total?: number
+  }>
   detailsSpecifiques: {
     activite_nom: string
     categorie: string[]
@@ -62,11 +75,16 @@ export interface ActivityReservation extends ReservationBase {
 
 export interface HebergementReservation extends ReservationBase {
   type: 'HEBERGEMENT'
+  nbJours?: number
   detailsSpecifiques: {
     adultes: number
     enfants: number
-    prixNuit: number
-    produits: Record<string, unknown>
+    prixNuit?: number
+    options?: Record<string, boolean>
+    produits?: {
+      prixNuit?: number
+      [key: string]: unknown
+    }
   }
   nbNuits: number
 }
@@ -75,12 +93,33 @@ export interface CarReservation extends ReservationBase {
   type: 'LOCATION_VOITURE'
   vehiculeRef?: string
   modePaiement?: string
+  nbJours?: number
+  ville_depart?: string
+  ville_retour?: string
+  deuxiemeConducteur?: boolean
+  options?: string[]
+  optionsSelectionnees?: string[]
+  optionsExtras?: Record<string, boolean>
+  IdDocType?: string | null
+  IdDocUrl?: string | null
+  LicDocType?: string | null
+  LicDocUrl?: string | null
+  SecondIdDocType?: string | null
+  SecondIdDocUrl?: string | null
+  SecondLicDocType?: string | null
+  SecondLicDocUrl?: string | null
   conducteur_principal: {
     nom: string
     prenom: string
     email: string
     telephone?: string
   }
+  conducteur_secondaire?: {
+    nom?: string
+    prenom?: string
+    email?: string
+    telephone?: string
+  } | null
   detailsSpecifiques: {
     catalogue_nom: string
     carburant: string
@@ -89,11 +128,25 @@ export interface CarReservation extends ReservationBase {
     caution: number
     places: number
     portes: number
+    ville_depart?: string
+    ville_retour?: string
+    agence_nom?: string
   }
   documents?: {
+    idDocRectoUrl?: string
+    idDocRectoType?: string
     idDocUrl?: string
+    idDocType?: string
+    idDocVersoUrl?: string
+    idDocVersoType?: string
+    licDocRectoUrl?: string
+    licDocRectoType?: string
     licDocUrl?: string
+    licDocType?: string
+    licDocVersoUrl?: string
+    licDocVersoType?: string
   }
+  documentsSecondConducteur?: Record<string, unknown> | null
 }
 
 export interface VtcReservation extends ReservationBase {
@@ -107,11 +160,14 @@ export interface VtcReservation extends ReservationBase {
     address: string
     lat: number
     lng: number
+    distance?: string
   }
   passengers: number
   estimatedArrival?: ReservationDateValue
   isAllerSimple: boolean
   vehiculeId?: string
+  heurePrise?: string
+  driverId?: string | null
 }
 
 export interface ClientReservationItem {

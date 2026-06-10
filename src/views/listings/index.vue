@@ -14,7 +14,7 @@
         />
 
         <select v-model="filterCategory" class="rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:border-brand-300 focus:outline-none dark:border-gray-700 dark:bg-gray-900 dark:text-gray-200">
-          <option value="">Categorie</option>
+          <option value="">Categories</option>
           <option value="ACTIVITE">Activite</option>
           <option value="HEBERGEMENT">Hebergement</option>
           <option value="LOCATION_VOITURE">Location de voiture</option>

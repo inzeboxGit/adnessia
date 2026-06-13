@@ -751,6 +751,6 @@ const handleBack = async () => {
     router.back()
     return
   }
-  await router.push('/opportunities')
+  await router.push('/partenaires')
 }
 </script>

@@ -139,7 +139,7 @@
                   <span class="block font-medium text-gray-700 text-theme-sm dark:text-white/90">{{ item.providerName }}</span>
                   <router-link
                     v-if="item.providerId"
-                    :to="{ name: 'opportunities.detail', params: { id: item.providerId } }"
+                    :to="{ name: 'partenaires.detail', params: { id: item.providerId } }"
                     class="block text-theme-xs text-brand-600 hover:underline dark:text-brand-400"
                   >
                     Voir le partenaire

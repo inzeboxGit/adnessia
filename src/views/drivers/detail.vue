@@ -3,13 +3,19 @@
     <page-breadcrumb :page-title="driver ? driver.fullName : 'Détails chauffeur'" />
 
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <router-link :to="{ path: '/drivers' }" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+      <router-link :to="backLink" class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
         <span aria-hidden>←</span>
-        Retour a la liste
+        {{ backLabel }}
       </router-link>
 
       <div class="flex items-center gap-2">
-        <button v-if="driver" type="button" class="rounded-lg bg-brand-500 px-3 py-2 text-xs font-semibold text-white" @click="openModeration = true">Modération</button>
+        <span
+          v-if="isDriverModerationApproved"
+          class="rounded-lg border border-success-200 bg-success-50 px-3 py-2 text-xs font-semibold text-success-700"
+        >
+          Chauffeur confirmé
+        </span>
+        <button v-else-if="driver" type="button" class="rounded-lg bg-brand-500 px-3 py-2 text-xs font-semibold text-white" @click="openModeration = true">Modération</button>
         <button v-if="driver" :disabled="verifying" type="button" class="rounded-lg px-3 py-2 text-xs font-semibold text-white" :class="driver.isVerified ? 'bg-amber-500 hover:bg-amber-600' : 'bg-emerald-500 hover:bg-emerald-600'" @click="handleVerify">
           {{ driver.isVerified ? 'Désactiver le chauffeur' : 'Valider le chauffeur' }}
         </button>
@@ -136,6 +142,88 @@
           </ul>
         </article>
       </div>
+
+      <article class="rounded-2xl border border-gray-200 bg-white p-5">
+        <div class="mb-4 flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-semibold text-gray-900">Courses du chauffeur</h3>
+            <p class="text-xs text-gray-500">Demandes affectées à ce chauffeur</p>
+          </div>
+          <span class="text-xs font-medium text-gray-500">{{ driverRides.length }} course(s)</span>
+        </div>
+
+        <div v-if="!ridesLoading" class="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <article class="rounded-2xl border border-amber-200/70 bg-amber-50/60 p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-amber-600">Ouvertes</p>
+            <p class="mt-1 text-2xl font-bold text-amber-700">{{ openRidesCount }}</p>
+          </article>
+          <article class="rounded-2xl border border-blue-200/70 bg-blue-50/60 p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-blue-600">Confirmées</p>
+            <p class="mt-1 text-2xl font-bold text-blue-700">{{ confirmedRidesCount }}</p>
+          </article>
+          <article class="rounded-2xl border border-emerald-200/70 bg-emerald-50/60 p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-600">Terminées</p>
+            <p class="mt-1 text-2xl font-bold text-emerald-700">{{ completedRidesCount }}</p>
+          </article>
+          <article class="rounded-2xl border border-rose-200/70 bg-rose-50/60 p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-rose-600">Annulées</p>
+            <p class="mt-1 text-2xl font-bold text-rose-700">{{ canceledRidesCount }}</p>
+          </article>
+        </div>
+
+        <div v-if="ridesLoading" class="rounded-lg border border-dashed border-gray-300 px-3 py-6 text-sm text-gray-500">
+          Chargement des courses...
+        </div>
+
+        <div v-else-if="driverRides.length === 0" class="rounded-lg border border-dashed border-gray-300 px-3 py-6 text-sm text-gray-500">
+          Aucune course trouvée pour ce chauffeur.
+        </div>
+
+        <div v-else class="overflow-x-auto rounded-xl border border-gray-100">
+          <table class="min-w-full divide-y divide-gray-100">
+            <thead>
+              <tr class="bg-gray-50">
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Demande</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Trajet</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Client</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Statut</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Driver stage</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Paiement</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Montant</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Créée le</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 bg-white">
+              <tr v-for="ride in driverRides" :key="ride.id" class="hover:bg-gray-50/80">
+                <td class="px-3 py-3">
+                  <p class="text-xs text-gray-500">N Commande {{ ride.orderId || 'Sans orderId' }}</p>
+                </td>
+                <td class="px-3 py-3 text-sm text-gray-600">
+                  <p class="max-w-xs truncate font-medium text-gray-700">{{ ride.pickupAddress }}</p>
+                  <p class="max-w-xs truncate text-xs text-gray-500">{{ ride.dropoffAddress }}</p>
+                </td>
+                <td class="px-3 py-3">
+                  <p class="text-sm font-medium text-gray-700">{{ ride.clientName || '—' }}</p>
+                </td>
+                <td class="px-3 py-3">
+                  <span class="rounded-full px-2 py-0.5 text-xs font-medium" :class="rideStatusClass(ride.statusGroup)">{{ displayRideStatus(ride.status, ride.statusGroup) }}</span>
+                  <p v-if="ride.canceledBy" class="mt-1 text-xs text-gray-500">par {{ ride.canceledBy }}</p>
+                </td>
+                <td class="px-3 py-3">
+                  <span class="rounded-full px-2 py-0.5 text-xs font-medium" :class="rideStageClass(ride.driverStage)">{{ ride.driverStage || '—' }}</span>
+                  <p v-if="typeof ride.isBusy === 'boolean'" class="mt-1 text-xs text-gray-500">{{ ride.isBusy ? 'busy' : 'free' }}</p>
+                </td>
+                <td class="px-3 py-3">
+                  <p class="text-sm font-medium text-gray-700">{{ ride.paymentMethod || '—' }}</p>
+                  <p class="text-xs text-gray-500">{{ ride.clientPaidAt ? 'Payé' : 'Non payé' }}</p>
+                </td>
+                <td class="px-3 py-3 text-sm font-semibold text-gray-700">{{ formatRideMoney(ride.amount, ride.currency) }}</td>
+                <td class="px-3 py-3 text-sm text-gray-600">{{ formatDateTime(ride.createdAt) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </article>
       
         <article class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
           <div class="mb-4 flex items-center justify-between">
@@ -211,6 +299,7 @@ import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import DriverModerationModal from '@/components/drivers/DriverModerationModal.vue'
 import { getDriverById, getDriverHistories, verifyDriver } from '@/services/drivers'
+import { getDriverRideRequests, type RideRequestRow, type RideStatusGroup } from '@/services/ride-requests'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
@@ -219,6 +308,23 @@ const id = String(route.params.id || '')
 const driver = ref(null as any)
 const loading = ref(true)
 const openModeration = ref(false)
+
+const isDriverModerationApproved = computed(() => {
+  return String(driver.value?.moderation?.status || '').toLowerCase() === 'approved'
+})
+
+const backLink = computed(() => {
+  const partnerId = String(route.query.partnerId || '').trim()
+  if (partnerId) {
+    return { name: 'partenaires.detail', params: { id: partnerId }, hash: '#chauffeurs' }
+  }
+
+  return { path: '/drivers' }
+})
+
+const backLabel = computed(() => {
+  return String(route.query.partnerId || '').trim() ? 'Retour aux chauffeurs' : 'Retour a la liste'
+})
 
 const initials = (name: string) => (name || '?').split(' ').slice(0,2).map(n=>n[0]||'').join('').toUpperCase()
 
@@ -230,8 +336,46 @@ const formatDate = (value?: Date | { seconds?: number } | null) => {
 }
 
 const formatMoney = (v:number) => `${v?.toFixed?.(1) ?? '0.0'} Dhs`
+const formatRideMoney = (value:number, currency = 'MAD') => `${value?.toFixed?.(1) ?? '0.0'} ${currency === 'MAD' ? 'Dhs' : currency}`
+
+const formatDateTime = (value?: Date | { seconds?: number } | null) => {
+  if (!value) return '—'
+  if (value instanceof Date) return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(value)
+  if (typeof value?.seconds === 'number') return new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(value.seconds * 1000))
+  return '—'
+}
+
+const rideStatusClass = (status: RideStatusGroup) => {
+  if (status === 'completed') return 'bg-success-50 text-success-600'
+  if (status === 'confirmed') return 'bg-brand-50 text-brand-600'
+  if (status === 'canceled') return 'bg-error-50 text-error-600'
+  return 'bg-warning-50 text-warning-600'
+}
+
+const rideStageClass = (stage?: string) => {
+  const value = String(stage || '').toLowerCase()
+  if (/(finish|complete|termine)/.test(value)) return 'bg-success-50 text-success-600'
+  if (/(cancel|annul)/.test(value)) return 'bg-error-50 text-error-600'
+  if (/(arriv|progress|trip|accept|confirm)/.test(value)) return 'bg-brand-50 text-brand-600'
+  return 'bg-gray-100 text-gray-600'
+}
+
+const displayRideStatus = (status?: string, group?: RideStatusGroup) => {
+  if (status && status !== '—') return status
+  if (group === 'completed') return 'completed'
+  if (group === 'confirmed') return 'confirmed'
+  if (group === 'canceled') return 'canceled'
+  if (group === 'open') return 'open'
+  return '—'
+}
 
 const moderationInfo = ref('—')
+const driverRides = ref<RideRequestRow[]>([])
+const ridesLoading = ref(true)
+const openRidesCount = computed(() => driverRides.value.filter((ride) => ride.statusGroup === 'open').length)
+const confirmedRidesCount = computed(() => driverRides.value.filter((ride) => ride.statusGroup === 'confirmed').length)
+const completedRidesCount = computed(() => driverRides.value.filter((ride) => ride.statusGroup === 'completed').length)
+const canceledRidesCount = computed(() => driverRides.value.filter((ride) => ride.statusGroup === 'canceled').length)
 const documentReasons = ref<Record<string, string>>({})
 const documentSaving = ref<Record<string, boolean>>({})
 const documentError = ref<string | null>(null)
@@ -427,6 +571,24 @@ const loadHistories = async () => {
   }
 }
 
+const loadDriverRides = async () => {
+  if (!driver.value?.id) {
+    driverRides.value = []
+    ridesLoading.value = false
+    return
+  }
+
+  ridesLoading.value = true
+  try {
+    driverRides.value = await getDriverRideRequests(driver.value.id, driver.value.uid)
+  } catch (e) {
+    console.error('Failed to load driver rides', e)
+    driverRides.value = []
+  } finally {
+    ridesLoading.value = false
+  }
+}
+
 const scrollToHistories = () => {
   const el = document.getElementById('histories')
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -446,6 +608,7 @@ const handleVerify = async () => {
     driver.value = d
     moderationInfo.value = (d && (d as any).moderation)?.status ? `${(d as any).moderation.status} (${(d as any).moderation.reason || '—'})` : '—'
     await loadHistories()
+    await loadDriverRides()
     setTimeout(()=>{ verifySuccess.value = null }, 4000)
   } catch (e) {
     console.error(e)
@@ -464,6 +627,7 @@ onMounted(async ()=>{
     // read moderation info if present
     moderationInfo.value = (d && (d as any).moderation)?.status ? `${(d as any).moderation.status} (${(d as any).moderation.reason || '—'})` : '—'
     await loadHistories()
+    await loadDriverRides()
     if (route.hash === '#histories') setTimeout(()=>scrollToHistories(), 200)
   }finally{ loading.value = false }
 })
@@ -482,6 +646,6 @@ const onModerationDone = ({ decision, error }:{decision:string,error?:any})=>{
 
   // refresh driver
   loading.value = true
-  getDriverById(id).then(d=>{ driver.value = d; moderationInfo.value = (d && (d as any).moderation)?.status ? `${(d as any).moderation.status} (${(d as any).moderation.reason || '—'})` : '—'; loading.value=false }).finally(()=>{ loadHistories() })
+  getDriverById(id).then(async d=>{ driver.value = d; moderationInfo.value = (d && (d as any).moderation)?.status ? `${(d as any).moderation.status} (${(d as any).moderation.reason || '—'})` : '—'; await loadDriverRides(); loading.value=false }).finally(()=>{ loadHistories() })
 }
 </script>

@@ -176,14 +176,14 @@
                 <td class="px-3 py-3">
                   <div class="flex items-center gap-2">
                     <router-link
-                      :to="{ name: 'drivers.detail', params: { id: row.id } }"
+                      :to="{ name: 'drivers.detail', params: { id: row.id }, query: { type: 'driver' } }"
                       class="rounded-lg border border-gray-200 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50 flex items-center justify-center"
                       aria-label="Voir detail"
                     >
                       <EyeIcon />
                     </router-link>
                     <router-link
-                      :to="{ name: 'drivers.detail', params: { id: row.id }, hash: '#histories' }"
+                      :to="{ name: 'drivers.detail', params: { id: row.id }, query: { type: 'driver' }, hash: '#histories' }"
                       class="rounded-lg border border-gray-200 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50 flex items-center justify-center"
                       aria-label="Voir historique"
                     >

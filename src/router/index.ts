@@ -82,8 +82,8 @@ const router = createRouter({
       },
     },
     {
-      path: '/opportunities',
-      name: 'Opportunities',
+      path: '/partenaires',
+      name: 'Partenaires',
       component: () => import('../views/partenaires/Partenaires.vue'),
       meta: {
         title: 'Prestataires',
@@ -114,16 +114,16 @@ const router = createRouter({
       },
     },
     {
-      path: '/opportunities/pending',
-      name: 'opportunities.pending',
+      path: '/partenaires/pending',
+      name: 'partenaires.pending',
       component: () => import('../views/partenaires/pending.vue'),
       meta: {
         title: 'Prestataires en attente',
       },
     },
     {
-      path: '/opportunities/:id',
-      name: 'opportunities.detail',
+      path: '/partenaires/:id',
+      name: 'partenaires.detail',
       component: () => import('../views/partenaires/detail.vue'),
       meta: {
         title: 'Detail Prestataire',

@@ -2,6 +2,11 @@ import { collection, getDocs, doc, getDoc, updateDoc, serverTimestamp, addDoc, q
 import { db, auth } from '~/config/firebase'
 
 type DateLike = Date | { seconds?: number } | null | undefined
+type DriverAgencyFilter = {
+  id?: string | null
+  agenceRef?: string | null
+  uid?: string | null
+}
 
 const pickFirstValue = (...values: Array<string | number | undefined | null>) => {
   for (const value of values) {
@@ -45,6 +50,8 @@ const formatVehicleLabel = (value: unknown): string => {
   return ''
 }
 
+const normalizeKey = (value: unknown) => String(value || '').trim().toLowerCase()
+
 const resolveVehicleInfo = async (driverData: Record<string, any>, agencyUid?: string) => {
   const existingLabel = formatVehicleLabel(driverData.vehicle)
   const explicitVehicleId = pickFirstValue(
@@ -62,14 +69,11 @@ const resolveVehicleInfo = async (driverData: Record<string, any>, agencyUid?: s
     driverData.vehicule?.uid,
   )
 
-  if (existingLabel) {
-    return { label: existingLabel, vehicleId: explicitVehicleId || '' }
-  }
-
   const vehicleId = explicitVehicleId
+  let matchedAgencyVehicle = false
 
   if (!agencyUid) {
-    return { label: existingLabel || '—', vehicleId: explicitVehicleId || '' }
+    return { label: existingLabel || '—', vehicleId: explicitVehicleId || '', matchedAgencyVehicle }
   }
 
   try {
@@ -77,10 +81,13 @@ const resolveVehicleInfo = async (driverData: Record<string, any>, agencyUid?: s
       const snap = await getDoc(doc(db, 'agences', agencyUid, 'vtc_vehicules', vehicleId))
       if (snap.exists()) {
         const label = formatVehicleLabel(snap.data())
-        if (label) {
-          return { label, vehicleId: snap.id || vehicleId }
-        }
+        matchedAgencyVehicle = true
+        return { label: label || existingLabel || '—', vehicleId: snap.id || vehicleId, matchedAgencyVehicle }
       }
+    }
+
+    if (existingLabel) {
+      return { label: existingLabel, vehicleId: explicitVehicleId || '', matchedAgencyVehicle }
     }
 
     const vehiclesSnap = await getDocs(collection(db, 'agences', agencyUid, 'vtc_vehicules'))
@@ -88,14 +95,71 @@ const resolveVehicleInfo = async (driverData: Record<string, any>, agencyUid?: s
       const firstDoc = vehiclesSnap.docs[0]
       const label = formatVehicleLabel(firstDoc.data())
       if (label) {
-        return { label, vehicleId: firstDoc.id }
+        return { label, vehicleId: firstDoc.id, matchedAgencyVehicle }
       }
     }
   } catch {
     // ignore and fall back to existing value
   }
 
-  return { label: existingLabel || '—', vehicleId: explicitVehicleId || '' }
+  return { label: existingLabel || '—', vehicleId: explicitVehicleId || '', matchedAgencyVehicle }
+}
+
+const extractDriverAgencyKeys = (driverData: Record<string, any>) => {
+  const nestedAgence = typeof driverData.agence === 'object' && driverData.agence !== null ? driverData.agence as Record<string, any> : {}
+  const nestedAgency = typeof driverData.agency === 'object' && driverData.agency !== null ? driverData.agency as Record<string, any> : {}
+  const nestedProvider = typeof driverData.provider === 'object' && driverData.provider !== null ? driverData.provider as Record<string, any> : {}
+  const nestedPartner = typeof driverData.partner === 'object' && driverData.partner !== null ? driverData.partner as Record<string, any> : {}
+
+  return new Set(
+    [
+      driverData.agenceId,
+      driverData.agenceRef,
+      driverData.agencyId,
+      driverData.agencyRef,
+      driverData.providerId,
+      driverData.providerRef,
+      driverData.partnerId,
+      driverData.partnerRef,
+      driverData.hostId,
+      driverData.hostRef,
+      driverData.ownerId,
+      driverData.ownerRef,
+      nestedAgence.id,
+      nestedAgence.uid,
+      nestedAgence.agenceRef,
+      nestedAgency.id,
+      nestedAgency.uid,
+      nestedAgency.agencyRef,
+      nestedProvider.id,
+      nestedProvider.uid,
+      nestedProvider.agenceRef,
+      nestedPartner.id,
+      nestedPartner.uid,
+      nestedPartner.agenceRef,
+    ]
+      .map(normalizeKey)
+      .filter(Boolean),
+  )
+}
+
+const agencyMatchesDriver = (driverData: Record<string, any>, agency?: DriverAgencyFilter | null) => {
+  if (!agency) return true
+
+  const agencyKeys = new Set(
+    [agency.id, agency.agenceRef, agency.uid]
+      .map(normalizeKey)
+      .filter(Boolean),
+  )
+
+  if (agencyKeys.size === 0) return true
+
+  const driverAgencyKeys = extractDriverAgencyKeys(driverData)
+  for (const key of driverAgencyKeys) {
+    if (agencyKeys.has(key)) return true
+  }
+
+  return false
 }
 
 export type DriverRow = {
@@ -126,9 +190,10 @@ const asDateLike = (value: unknown): DateLike => {
   return null
 }
 
-export async function getDriversTable(): Promise<DriverRow[]> {
+export async function getDriversTable(options?: { agency?: DriverAgencyFilter | null }): Promise<DriverRow[]> {
   const driversSnap = await getDocs(collection(db, 'drivers'))
-  const agencyUid = auth?.currentUser?.uid || ''
+  const agency = options?.agency ?? null
+  const agencyUid = agency?.uid || ''
 
   const rows: DriverRow[] = []
 
@@ -151,6 +216,9 @@ export async function getDriversTable(): Promise<DriverRow[]> {
     }
 
     const vehicleInfo = await resolveVehicleInfo(data, agencyUid)
+    if (agency && !agencyMatchesDriver(data, agency) && !vehicleInfo.matchedAgencyVehicle) {
+      continue
+    }
 
     rows.push({
       id: doc.id,

@@ -173,6 +173,20 @@ export async function getRideDriverOptions(): Promise<RideDriverOption[]> {
     .sort((a, b) => a.name.localeCompare(b.name, 'fr'))
 }
 
+export async function getDriverRideRequests(driverId: string, driverUid?: string): Promise<RideRequestRow[]> {
+  const normalizedDriverId = String(driverId || '').trim()
+  const normalizedDriverUid = String(driverUid || '').trim()
+  if (!normalizedDriverId && !normalizedDriverUid) return []
+
+  const { rows } = await getRideRequestsData()
+
+  return rows.filter((row) =>
+    [row.selectedDriverId, row.paymentDriverId].some(
+      (value) => value && (value === normalizedDriverId || value === normalizedDriverUid),
+    ),
+  )
+}
+
 export async function reassignRideRequest(rideId: string, driverId: string) {
   if (!rideId) throw new Error('Missing ride id')
   if (!driverId) throw new Error('Missing driver id')

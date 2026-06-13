@@ -159,7 +159,7 @@ const permissionCategories: PermissionCategory[] = [
     key: 'platform',
     label: 'Gestion De La Plateforme',
     items: [
-      { key: 'opportunities', label: 'Prestataires' },
+      { key: 'partenaires', label: 'Prestataires' },
       { key: 'rideRequests', label: 'Gestion courses' },
       { key: 'listings', label: 'Listings' },
       { key: 'reservations', label: 'Reservations' },

@@ -167,7 +167,7 @@
                 <td class="px-3 py-3 text-sm text-gray-600">{{ formatDate(row.inscritLe) }}</td>
                 <td class="px-3 py-3">
                   <router-link
-                    :to="{ name: 'opportunities.detail', params: { id: row.id } }"
+                    :to="{ name: 'partenaires.detail', params: { id: row.id } }"
                     class="rounded-lg border border-gray-200 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50 flex items-center justify-center"
                     aria-label="Voir detail"
                   >

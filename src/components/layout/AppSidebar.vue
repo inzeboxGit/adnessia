@@ -276,8 +276,8 @@ const menuGroups: MenuGroup[] = [
         icon: UserGroupIcon,
         name: "Prestataires",
         subItems: [
-          { name: "Liste de partenaires", path: "/opportunities" },
-          { name: "Prestataire en attente", path: "/opportunities/pending" },
+          { name: "Liste de partenaires", path: "/partenaires" },
+          { name: "Prestataire en attente", path: "/partenaires/pending" },
         ],
       },
           {

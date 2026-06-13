@@ -4,7 +4,7 @@
 
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
       <router-link
-        :to="{ path: '/opportunities' }"
+        :to="{ path: '/partenaires' }"
         class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-3 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
       >
         <span aria-hidden="true">←</span>
@@ -15,13 +15,14 @@
         <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="applicationStatusClass(agence?.applicationStatus)">
           {{ applicationStatusLabel(agence?.applicationStatus) }}
         </span>
-        <span
+        <!-- <span
           v-if="isPartnerVerified"
           class="rounded-full border border-info-200 bg-info-50 px-2.5 py-1 text-xs font-semibold text-info-700 dark:border-info-900/40 dark:bg-info-900/20 dark:text-info-300"
         >
           Partenaire verifie
-        </span>
+        </span> -->
         <button
+          v-if="!isPartnerVerified"
           type="button"
           class="rounded-lg bg-success-500 px-3 py-2 text-xs font-semibold text-white hover:bg-success-600"
           @click="openPartnerModerationModal('approved')"
@@ -33,7 +34,7 @@
           class="rounded-lg bg-error-500 px-3 py-2 text-xs font-semibold text-white hover:bg-error-600"
           @click="openPartnerModerationModal('rejected')"
         >
-          Rejeter
+          Rejété / Désactiver le partenaire
         </button>
       </div>
     </div>
@@ -98,7 +99,7 @@
           <div class="mb-4 flex items-center gap-3">
             <div class="h-14 w-14 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
               <img v-if="agence.logo || agence.avatar" :src="agence.logo || agence.avatar" alt="logo" class="h-full w-full object-cover" />
-              <div v-else class="flex h-full w-full items-center justify-center text-lg font-semibold text-brand-600">{{ initials(agence) }}</div>
+              <div v-else class="flex h-full w-full items-center justify-center text-lg font-semibold text-brand-600">{{ agencyInitials(agence) }}</div>
             </div>
             <div>
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ agencyName(agence) }}</h3>
@@ -127,7 +128,7 @@
         </article>
       </div>
 
-      <article class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
+      <article id="chauffeurs" class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
         <div class="mb-4 flex items-center justify-between">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Documents prestataire</h3>
           <span class="text-xs text-gray-500">Validation individuelle avec motif</span>
@@ -229,6 +230,14 @@
             <button
               type="button"
               class="rounded-lg px-3 py-1.5 text-sm font-medium"
+              :class="activeTab === 'chauffeurs' ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'"
+              @click="activeTab = 'chauffeurs'"
+            >
+              Chauffeurs ({{ chauffeurs.length }})
+            </button>
+            <button
+              type="button"
+              class="rounded-lg px-3 py-1.5 text-sm font-medium"
               :class="activeTab === 'reservations' ? 'bg-brand-500 text-white' : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200'"
               @click="activeTab = 'reservations'"
             >
@@ -252,7 +261,70 @@
             </button>
           </div>
 
-          <div v-if="activeTab === 'reservations'" class="space-y-2">
+          <div v-if="activeTab === 'chauffeurs'" class="space-y-3">
+            <div v-if="chauffeursLoading" class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-5 text-sm text-gray-500 dark:border-gray-800 dark:bg-white/[0.03]">
+              Chargement des chauffeurs...
+            </div>
+            <div v-else-if="chauffeurs.length === 0" class="rounded-lg border border-dashed border-gray-300 px-4 py-5 text-sm text-gray-500 dark:border-gray-700">
+              Aucun chauffeur trouvé.
+            </div>
+            <div v-else class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-100 dark:divide-gray-800">
+                <thead>
+                  <tr class="bg-gray-50 dark:bg-gray-900/40">
+                    <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Chauffeur</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Email</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Téléphone</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Statut</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Vérifié</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Véhicule</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Solde</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Note</th>
+                    <th class="px-3 py-2 text-left text-xs font-semibold uppercase text-gray-500">Action</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 bg-white dark:divide-gray-800 dark:bg-transparent">
+                  <tr v-for="chauffeur in chauffeurs" :key="chauffeur.id" class="hover:bg-gray-50/80 dark:hover:bg-white/[0.03]">
+                    <td class="px-3 py-3">
+                      <div class="flex items-center gap-3">
+                        <div class="h-10 w-10 overflow-hidden rounded-full bg-gray-100 dark:bg-gray-800">
+                          <img v-if="chauffeur.profileImage" :src="chauffeur.profileImage" alt="avatar" class="h-full w-full object-cover" />
+                          <div v-else class="flex h-full w-full items-center justify-center text-sm font-semibold text-brand-600">{{ driverInitials(chauffeur.fullName) }}</div>
+                        </div>
+                        <div>
+                          <p class="text-sm font-semibold text-gray-800 dark:text-white">{{ chauffeur.fullName }}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="px-3 py-3 text-sm text-gray-600 dark:text-gray-300">{{ chauffeur.email }}</td>
+                    <td class="px-3 py-3 text-sm text-gray-600 dark:text-gray-300">{{ chauffeur.phone || '—' }}</td>
+                    <td class="px-3 py-3">
+                      <span class="rounded-full px-2 py-0.5 text-xs font-medium" :class="driverStatusClass(chauffeur.status)">{{ chauffeur.status || '—' }}</span>
+                    </td>
+                    <td class="px-3 py-3">
+                      <span v-if="typeof chauffeur.isVerified === 'boolean'" class="rounded-full px-2 py-0.5 text-xs font-medium" :class="driverVerifiedClass(chauffeur.isVerified)">
+                        {{ chauffeur.isVerified ? 'Vérifié' : 'Non vérifié' }}
+                      </span>
+                      <span v-else class="text-xs text-gray-500">—</span>
+                    </td>
+                    <td class="px-3 py-3 text-sm text-gray-600 dark:text-gray-300">{{ chauffeur.vehicle || '—' }}</td>
+                    <td class="px-3 py-3 text-sm font-semibold text-gray-700 dark:text-gray-200">{{ formatMoney(chauffeur.balance || 0) }}</td>
+                    <td class="px-3 py-3 text-sm text-gray-700 dark:text-gray-200">{{ chauffeur.rating > 0 ? `${chauffeur.rating}/5` : '—' }}</td>
+                    <td class="px-3 py-3">
+                      <router-link
+                        :to="{ name: 'drivers.detail', params: { id: chauffeur.id }, query: { type: 'driver', partnerId: agence?.id || '' } }"
+                        class="rounded-lg border border-gray-200 px-2 py-1 text-xs text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200"
+                      >
+                        Voir détail
+                      </router-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div v-else-if="activeTab === 'reservations'" class="space-y-2">
             <div class="overflow-x-auto pb-1">
               <div class="flex min-w-max flex-nowrap items-end gap-1.5">
                 <div class="flex flex-col items-start gap-0.5">
@@ -532,13 +604,14 @@
 
 <script setup lang="ts">
 import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import { auth, authReady, db } from '~/config/firebase'
 import { toClientReservationDetailItem, type ClientReservationDetailItem, type Reservation } from '~/models/reservations'
 import { getAgence, getAgencePaiements, getAgenceReservations, getAgenceReviews } from '~/services/agences'
+import { getDriversTable, type DriverRow } from '@/services/drivers'
 import type { Agence, Paiement, Review } from '~/types'
 
 defineOptions({ name: 'PartenairesDetailPage' })
@@ -549,9 +622,11 @@ const agence = ref<Agence | null>(null)
 const reservations = ref<Reservation[]>([])
 const paiements = ref<Paiement[]>([])
 const reviews = ref<Review[]>([])
+const chauffeurs = ref<DriverRow[]>([])
 const loading = ref(true)
+const chauffeursLoading = ref(true)
 const error = ref<string | null>(null)
-const activeTab = ref<'reservations' | 'paiements' | 'reviews'>('reservations')
+const activeTab = ref<'chauffeurs' | 'reservations' | 'paiements' | 'reviews'>('reservations')
 const reservationCategoryFilter = ref('')
 const reservationStatusFilter = ref('')
 const reservationVilleFilter = ref('')
@@ -572,6 +647,19 @@ const partnerModerationReason = ref('')
 const partnerModerationSaving = ref(false)
 const partnerActionError = ref<string | null>(null)
 const partnerActionSuccess = ref<string | null>(null)
+
+const scrollToChauffeursAnchor = () => {
+  const element = document.getElementById('chauffeurs')
+  if (!element) return
+
+  const top = element.getBoundingClientRect().top + window.scrollY - 24
+  window.scrollTo({ top, behavior: 'smooth' })
+
+  window.setTimeout(() => {
+    const refreshedTop = element.getBoundingClientRect().top + window.scrollY - 24
+    window.scrollTo({ top: refreshedTop, behavior: 'smooth' })
+  }, 250)
+}
 
 type DocumentReviewStatus = 'approved' | 'rejected' | 'pending'
 
@@ -693,6 +781,10 @@ onMounted(async () => {
     const agenceId = String(route.params.id || '')
     if (!agenceId) return
 
+    if (route.hash === '#chauffeurs') {
+      activeTab.value = 'chauffeurs'
+    }
+
     const nessiaConfigSnap = await getDoc(doc(db, 'nessiaConfig', 'config'))
     nessiaFeesRate.value = Number(nessiaConfigSnap.data()?.nessiaFees ?? 0)
 
@@ -700,19 +792,27 @@ onMounted(async () => {
     agence.value = foundAgence
     if (!foundAgence) return
 
-    const [agenceReservations, agencePaiements, agenceReviews] = await Promise.all([
+    const [agenceReservations, agencePaiements, agenceReviews, driversRows] = await Promise.all([
       getAgenceReservations(foundAgence),
       getAgencePaiements(foundAgence),
       getAgenceReviews(agenceId),
+      getDriversTable({ agency: foundAgence }),
     ])
 
     reservations.value = agenceReservations
     paiements.value = agencePaiements
     reviews.value = agenceReviews
+    chauffeurs.value = driversRows
+
+    if (route.hash === '#chauffeurs') {
+      await nextTick()
+      scrollToChauffeursAnchor()
+    }
   } catch {
     error.value = 'Impossible de charger le detail du prestataire.'
   } finally {
     loading.value = false
+    chauffeursLoading.value = false
   }
 })
 
@@ -732,10 +832,41 @@ const documentStatusClass = (status?: string) => {
 
 const applicationStatusLabel = (status?: string) => {
   const value = String(status || '').toLowerCase()
-  if (value === 'approved') return 'Approuve'
-  if (value === 'rejected') return 'Rejete'
+  if (value === 'approved') return 'Approuvé'
+  if (value === 'rejected') return 'Rejété'
   if (value === 'suspended') return 'Suspendu'
   return 'En attente'
+}
+
+const driverInitials = (name: string) => {
+  return name
+    .split(' ')
+    .slice(0, 2)
+    .map((part) => part[0] || '')
+    .join('')
+    .toUpperCase() || '?'
+}
+
+const formatMoney = (value: number) => {
+  const formatted = new Intl.NumberFormat('fr-FR', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value)
+  return `${formatted} Dhs`
+}
+
+const driverStatusClass = (status?: string) => {
+  const value = String(status || '').toLowerCase()
+  if (value === 'online' || value === 'verified') return 'bg-success-50 text-success-600'
+  if (value === 'busy') return 'bg-warning-50 text-warning-600'
+  if (value === 'offline' || value === 'banned' || value === 'suspended') return 'bg-error-50 text-error-600'
+  return 'bg-gray-100 text-gray-600'
+}
+
+const driverVerifiedClass = (value?: boolean) => {
+  if (value === true) return 'bg-success-50 text-success-600'
+  if (value === false) return 'bg-warning-50 text-warning-600'
+  return 'bg-gray-100 text-gray-600'
 }
 
 const applicationStatusClass = (status?: string) => {
@@ -890,7 +1021,7 @@ const applyDocumentDecision = async (docKey: string, status: 'approved' | 'rejec
 }
 
 const agencyName = (item: Agence) => item.nom || item.name || `${item.firstName ?? ''} ${item.lastName ?? ''}`.trim() || '—'
-const initials = (item: Agence) => agencyName(item).split(' ').slice(0, 2).map((part) => part[0] || '').join('').toUpperCase() || '?'
+const agencyInitials = (item: Agence) => agencyName(item).split(' ').slice(0, 2).map((part) => part[0] || '').join('').toUpperCase() || '?'
 
 const providerAddress = (item: Agence) => {
   const source = item as Agence & { adresse?: string; address?: string; quartier?: string }

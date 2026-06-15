@@ -280,16 +280,16 @@ const menuGroups: MenuGroup[] = [
           { name: "Prestataire en attente", path: "/partenaires/pending" },
         ],
       },
-          {
-            icon: UserCircleIcon,
-            name: "Chauffeurs",
-            subItems: [{ name: "Liste des Chauffeurs", path: "/drivers" }],
-          },
-      {
-        icon: CalenderIcon,
-        name: "Gestion courses",
-        subItems: [{ name: "Demandes de course", path: "/ride-requests" }],
-      },
+          // {
+          //   icon: UserCircleIcon,
+          //   name: "Chauffeurs",
+          //   subItems: [{ name: "Liste des Chauffeurs", path: "/drivers" }],
+          // },
+      // {
+      //   icon: CalenderIcon,
+      //   name: "Gestion courses",
+      //   subItems: [{ name: "Demandes de course", path: "/ride-requests" }],
+      // },
       {
         icon: BoxIcon,
         name: "Listings",
@@ -300,10 +300,25 @@ const menuGroups: MenuGroup[] = [
         name: "Réservations",
         subItems: [{ name: "Toutes les réservations", path: "/reservations" }],
       },
+      // {
+      //   icon: UserCircleIcon,
+      //   name: "Clients",
+      //   subItems: [{ name: "Tous les clients", path: "/clients" }],
+      // },
+      
+    ],
+  },
+  {
+    title: "CRM Nessia",
+    items: [
       {
-        icon: UserCircleIcon,
-        name: "Clients",
-        subItems: [{ name: "Tous les clients", path: "/clients" }],
+        icon: UserGroupIcon,
+        name: "CRM Clients",
+        subItems: [
+          { name: "Clients", path: "/crm/clients" },
+          { name: "Segments", path: "/crm/segments" },
+          { name: "Campagnes", path: "/crm/campaigns" },
+        ],
       },
     ],
   },

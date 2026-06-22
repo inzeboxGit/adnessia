@@ -92,7 +92,8 @@ const ticketStatData = computed<TicketStatType[]>(() => {
       change: formatChange(source?.commission.change ?? 0),
       label: 'Commission',
       positive: (source?.commission.change ?? 0) >= 0,
-      unit: source?.commission.currency ?? 'MAD',
+      unit: 'MAD',
+      // source?.commission.currency ?? 
     },
     {
       id: 4,
@@ -107,7 +108,8 @@ const ticketStatData = computed<TicketStatType[]>(() => {
       change: formatChange(source?.confirmedAmount.change ?? 0),
       label: 'Montant confirme',
       positive: (source?.confirmedAmount.change ?? 0) >= 0,
-      unit: source?.confirmedAmount.currency ?? 'MAD',
+      unit: 'MAD',
+      // source?.confirmedAmount.currency ?? 
     },
   ]
 })

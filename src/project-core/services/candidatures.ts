@@ -1,4 +1,4 @@
-import { collection, getDocs } from 'firebase/firestore'
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore'
 import { db } from '~/config/firebase'
 import type { PrestataireCandidature } from '~/types'
 
@@ -40,4 +40,15 @@ export async function getCandidaturesPrestataires(status?: string): Promise<Pres
     const bDate = toDate(b.createdAt)?.getTime() || 0
     return bDate - aDate
   })
+}
+
+export async function getCandidaturePrestataire(id: string): Promise<PrestataireCandidature | null> {
+  const snap = await getDoc(doc(db, COLLECTION, id))
+
+  if (!snap.exists()) return null
+
+  return {
+    id: snap.id,
+    ...snap.data(),
+  } as PrestataireCandidature
 }

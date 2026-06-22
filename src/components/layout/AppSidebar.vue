@@ -277,7 +277,8 @@ const menuGroups: MenuGroup[] = [
         name: "Prestataires",
         subItems: [
           { name: "Liste de partenaires", path: "/partenaires" },
-          { name: "Prestataire en attente", path: "/partenaires/pending" },
+          { name: "Partenaires en attente de modération", path: "/partenaires?view=moderation" },
+          { name: "Candidatures ", path: "/partenaires/pending" },
         ],
       },
           // {
@@ -316,8 +317,8 @@ const menuGroups: MenuGroup[] = [
         name: "CRM Clients",
         subItems: [
           { name: "Clients", path: "/crm/clients" },
-          { name: "Segments", path: "/crm/segments" },
-          { name: "Campagnes", path: "/crm/campaigns" },
+          // { name: "Segments", path: "/crm/segments" },
+          // { name: "Campagnes", path: "/crm/campaigns" },
         ],
       },
     ],
@@ -357,7 +358,7 @@ const menuGroups: MenuGroup[] = [
         subItems: [
           { name: "Historique transactions", path: "/finance/payments" },
           { name: "Transactions partenaires", path: "/finance/partner-transactions" },
-          { name: "Details facture", path: "/finance/invoice-details" },
+          // { name: "Details facture", path: "/finance/invoice-details" },
         ],
       },
       {

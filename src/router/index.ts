@@ -122,6 +122,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/partenaires/pending/:id',
+      name: 'partenaires.pending.detail',
+      component: () => import('../views/partenaires/pending-detail.vue'),
+      meta: {
+        title: 'Detail candidature prestataire',
+      },
+    },
+    {
       path: '/partenaires/:id',
       name: 'partenaires.detail',
       component: () => import('../views/partenaires/detail.vue'),
@@ -168,6 +176,10 @@ const router = createRouter({
       meta: {
         title: 'Clients',
       },
+    },
+    {
+      path: '/crm/clients',
+      redirect: '/clients',
     },
     {
       path: '/clients/:id',

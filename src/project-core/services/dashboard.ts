@@ -58,6 +58,10 @@ export type DashboardHeadlineStats = {
   pendingProviders: number
 }
 
+export type DashboardSponsoringRevenueStats = {
+  revenueMad: number
+}
+
 export type DashboardAlertStats = {
   pendingReservations: number
   listingReports: number
@@ -327,6 +331,28 @@ export async function getDashboardPerformanceStats(filter?: DashboardDateFilter)
     revenueMad,
     newProvidersCount,
   }
+}
+
+export async function getDashboardSponsoringRevenueStats(
+  filter?: DashboardDateFilter,
+): Promise<DashboardSponsoringRevenueStats> {
+  const paiementsSnap = await getDocs(collection(db, 'paiements'))
+
+  const revenueMad = paiementsSnap.docs.reduce((sum, doc) => {
+    const paiement = doc.data() as Paiement
+    const reference = String(paiement.reference || '')
+    const statut = String(paiement.statut || '').toLowerCase()
+
+    if (!reference.startsWith('SPON-')) return sum
+    if (statut !== 'paid') return sum
+    if (!isInDateRange(paiement.dateCreation, filter)) return sum
+
+    console.log('paiement xxx', paiement, 'sum', sum)
+
+    return sum + Number(paiement.montant ?? 0)
+  }, 0)
+
+  return { revenueMad }
 }
 
 export async function getDashboardAlertStats(filter?: DashboardDateFilter): Promise<DashboardAlertStats> {

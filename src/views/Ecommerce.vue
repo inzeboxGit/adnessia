@@ -25,11 +25,12 @@
         </div>
       </section>
 
-      <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <article
+      <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-6">
+        <router-link
           v-for="card in topStats"
           :key="card.title"
-          class="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]"
+:to="card.to"
+          class="block rounded-xl border border-gray-200 bg-white p-5 transition hover:border-blue-300 hover:shadow-sm dark:border-gray-800 dark:bg-white/[0.03] dark:hover:border-blue-700"
         >
           <div class="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl border" :style="iconBadgeStyle(card.iconColor)">
             <component :is="card.icon" class="h-5 w-5" :style="{ color: card.iconColor }" />
@@ -43,7 +44,7 @@
             <span class="rounded-md px-1.5 py-0.5 text-xs font-semibold" :class="card.deltaClass">{{ card.delta }}</span>
           </div>
           <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">{{ card.caption }}</p>
-        </article>
+        </router-link>
       </section>
 
       <section class="rounded-xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-white/[0.03]">
@@ -68,10 +69,10 @@
             </div>
             <p class="text-base font-medium text-gray-700 dark:text-gray-200">{{ item.title }}</p>
             <p class="text-sm text-gray-500 dark:text-gray-400">{{ item.subtitle }}</p>
-            <button class="mt-4 inline-flex items-center gap-1 text-sm font-semibold" :class="item.linkClass" type="button">
+            <router-link :to="item.to" class="mt-4 inline-flex items-center gap-1 text-sm font-semibold" :class="item.linkClass">
               Voir
               <ArrowRight class="h-4 w-4" />
-            </button>
+            </router-link>
           </article>
         </div>
       </section>
@@ -81,7 +82,20 @@
           <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Activite recente</h2>
           <ul class="mt-5 space-y-4">
             <li v-for="entry in activity" :key="entry.title" class="flex items-start justify-between gap-3">
-              <div class="flex items-start gap-3">
+              <router-link
+                v-if="entry.kind === 'RESERVATION'"
+                :to="{ name: 'reservations.detail', params: { id: entry.id } }"
+                class="flex items-start gap-3"
+              >
+                <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg border" :style="iconBadgeStyle(activityColor(entry.kind))">
+                  <component :is="activityIcon(entry.kind)" class="h-4 w-4" :style="{ color: activityColor(entry.kind) }" />
+                </span>
+                <div>
+                  <p class="text-sm font-semibold text-gray-800 hover:text-blue-600 dark:text-gray-100 dark:hover:text-blue-300">{{ entry.title }}</p>
+                  <p class="text-sm text-gray-500 dark:text-gray-400">{{ entry.subtitle }}</p>
+                </div>
+              </router-link>
+              <div v-else class="flex items-start gap-3">
                 <span class="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg border" :style="iconBadgeStyle(activityColor(entry.kind))">
                   <component :is="activityIcon(entry.kind)" class="h-4 w-4" :style="{ color: activityColor(entry.kind) }" />
                 </span>
@@ -93,10 +107,11 @@
               <span class="text-sm text-gray-400 dark:text-gray-500">{{ formatRelativeTime(entry.createdAt) }}</span>
             </li>
           </ul>
-          <button class="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300" type="button">
+          <router-link to="/reservations"
+            class="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300">
             Voir toute l'activite
             <ArrowRight class="h-4 w-4" />
-          </button>
+          </router-link>
         </article>
 
         <article class="rounded-2xl border border-gray-200 bg-white p-5 xl:col-span-7 dark:border-gray-800 dark:bg-white/[0.03]">
@@ -190,6 +205,7 @@ import {
   getDashboardHeadlineStats,
   getDashboardRecentActivity,
   getDashboardPerformanceStats,
+  getDashboardSponsoringRevenueStats,
   getDashboardTopCategoriesByListings,
   getDashboardTopCitiesByListings,
   type DashboardDateFilter,
@@ -225,38 +241,58 @@ const periodLabel = computed(() => {
 })
 
 const topStats = ref([
-  {
-    title: "Reservations aujourd'hui",
-    value: '128',
-    delta: '+18%',
-    caption: 'vs hier',
-    icon: CalendarCheck,
-    iconColor: '#2563EB',
-    deltaClass: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300',
-  },
+
   {
     title: "Chiffre d'affaires",
     value: '25 680 Dhs',
     delta: '+12%',
     caption: "aujourd'hui",
+    to: '/finance/payments',
     icon: Wallet,
     iconColor: '#EA580C',
     deltaClass: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300',
   },
   {
-    title: 'Commission Nesiya',
+    title: 'Commission Nessia',
     value: '4 256 Dhs',
     delta: '+14%',
     caption: "Aujourd'hui",
+    to: '/finance/partner-transactions',
     icon: Percent,
     iconColor: '#7C3AED',
     deltaClass: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300',
   },
+
+  {
+    title: 'Revenue Sponsoring',
+    value: '0 Dhs',
+    delta: '0%',
+    caption: 'Paiements SPON- paid',
+    to: '/bar-chart',
+    icon: Megaphone,
+    iconColor: '#E11D48',
+    deltaClass: 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300',
+  },
+
+  // ------ 
+  {
+    title: "Reservations",
+    value: '128',
+    delta: '+18%',
+    caption: 'vs hier',
+    to: '/reservations',
+    icon: CalendarCheck,
+    iconColor: '#2563EB',
+    deltaClass: 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300',
+  },
+
+
   {
     title: 'Litiges ouverts',
     value: '7',
     delta: '+2',
     caption: 'A traiter',
+    to: '/alerts',
     icon: ShieldAlert,
     iconColor: '#E11D48',
     deltaClass: 'bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-300',
@@ -266,10 +302,12 @@ const topStats = ref([
     value: '23',
     delta: '+5',
     caption: 'A valider',
+    to: '/partenaires?view=moderation',
     icon: UserRound,
     iconColor: '#CA8A04',
     deltaClass: 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300',
   },
+
 ])
 
 const alerts = ref([
@@ -277,6 +315,7 @@ const alerts = ref([
     value: '12',
     title: 'Reservations en attente',
     subtitle: 'A voir',
+    to: '/reservations',
     icon: CalendarClock,
     iconColor: '#F97316',
     linkClass: 'text-orange-600 hover:text-orange-700 dark:text-orange-300',
@@ -285,6 +324,7 @@ const alerts = ref([
     value: '4',
     title: 'Remboursements',
     subtitle: 'A traiter',
+    to: '/finance/payments',
     icon: BadgeDollarSign,
     iconColor: '#E11D48',
     linkClass: 'text-pink-600 hover:text-pink-700 dark:text-pink-300',
@@ -293,6 +333,7 @@ const alerts = ref([
     value: '7',
     title: 'Listings signales',
     subtitle: 'A verifier',
+    to: '/quality/provider-reports',
     icon: Flag,
     iconColor: '#CA8A04',
     linkClass: 'text-amber-600 hover:text-amber-700 dark:text-amber-300',
@@ -301,6 +342,7 @@ const alerts = ref([
     value: '3',
     title: 'Documents expires',
     subtitle: 'Prestataires',
+    to: '/documents',
     icon: FileWarning,
     iconColor: '#7C3AED',
     linkClass: 'text-violet-600 hover:text-violet-700 dark:text-violet-300',
@@ -309,6 +351,7 @@ const alerts = ref([
     value: '5',
     title: 'Tickets support',
     subtitle: 'ouverts',
+    to: '/ticket-supports',
     icon: MessageCircleWarning,
     iconColor: '#0284C7',
     linkClass: 'text-sky-600 hover:text-sky-700 dark:text-sky-300',
@@ -463,7 +506,17 @@ const loadDashboardData = async () => {
   const previousDateFilter: DashboardDateFilter = { startDate: previousStartDate, endDate: previousEndDate }
 
   try {
-    const [activityItems, categoryItems, cityItems, performanceStats, previousPerformanceStats, alertStats, headlineStats] = await Promise.all([
+    const [
+      activityItems,
+      categoryItems,
+      cityItems,
+      performanceStats,
+      previousPerformanceStats,
+      alertStats,
+      headlineStats,
+      sponsoringStats,
+      previousSponsoringStats,
+    ] = await Promise.all([
       getDashboardRecentActivity(5, dateFilter),
       getDashboardTopCategoriesByListings(dateFilter),
       getDashboardTopCitiesByListings(5, dateFilter),
@@ -471,6 +524,8 @@ const loadDashboardData = async () => {
       getDashboardPerformanceStats(previousDateFilter),
       getDashboardAlertStats(),
       getDashboardHeadlineStats(dateFilter),
+      getDashboardSponsoringRevenueStats(dateFilter),
+      getDashboardSponsoringRevenueStats(previousDateFilter),
     ])
 
     if (activityItems.length) activity.value = activityItems.slice(0, 5)
@@ -502,6 +557,7 @@ const loadDashboardData = async () => {
       headlineStats.reservationsConfirmedYesterday,
     )
     const commissionDelta = getDeltaPercent(headlineStats.commissionMad, headlineStats.revenuePreviousMad * (headlineStats.commissionRate / 100))
+    const sponsoringDelta = getDeltaPercent(sponsoringStats.revenueMad, previousSponsoringStats.revenueMad)
 
     topStats.value = [
       {
@@ -538,6 +594,13 @@ const loadDashboardData = async () => {
         delta: '0%',
         deltaClass: deltaBadgeClass(0),
         caption: 'Application En Attente',
+      },
+      {
+        ...topStats.value[5],
+        value: `${formatCompactNumber(sponsoringStats.revenueMad)} Dhs`,
+        delta: formatDelta(sponsoringDelta),
+        deltaClass: deltaBadgeClass(sponsoringDelta),
+        caption: 'Paiements SPON- paid',
       },
     ]
 

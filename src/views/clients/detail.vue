@@ -243,6 +243,20 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const expandedReservationPayments = ref<Record<string, boolean>>({})
 
+const resolveLoadErrorMessage = (cause: unknown) => {
+  const code = typeof cause === 'object' && cause && 'code' in cause ? String(cause.code) : ''
+
+  if (code === 'unavailable') {
+    return 'Impossible de joindre Firestore pour le moment. Verifie la connexion reseau et les acces Firebase.'
+  }
+
+  if (code === 'permission-denied') {
+    return 'Acces Firestore refuse pour ce client. Verifie les regles de securite et les droits du projet.'
+  }
+
+  return 'Impossible de charger le detail du client.'
+}
+
 const reservationDetailItems = computed<ClientReservationDetailItem[]>(() => {
   return reservations.value.map((reservation) => toClientReservationDetailItem(reservation, paiements.value))
 })
@@ -270,8 +284,9 @@ onMounted(async () => {
     reservations.value = customerReservations
     paiements.value = customerPaiements
     reviews.value = customerReviews
-  } catch {
-    error.value = 'Impossible de charger le detail du client.'
+  } catch (cause) {
+    console.error('[client-detail] load failed', cause)
+    error.value = resolveLoadErrorMessage(cause)
   } finally {
     loading.value = false
   }

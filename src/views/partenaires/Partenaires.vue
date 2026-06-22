@@ -4,7 +4,7 @@
         <!-- <div>Gerer les partenaires de votre plateforme, visualiser leurs performances et acceder a leurs details</div> -->
 
     <div class="space-y-6">
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <div v-if="currentView !== 'moderation'" class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <article class="rounded-2xl border border-blue-200/70 bg-blue-50/60 p-4 dark:border-blue-900/50 dark:bg-blue-900/20">
           <div class="mb-3 flex items-start justify-between">
             <div>
@@ -194,6 +194,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import { getPartenairesTable, type PartenaireRow } from '@/services/partenaires'
@@ -201,6 +202,7 @@ import { EyeIcon } from '@/icons'
 
 defineOptions({ name: 'PartenairesPage' })
 
+const route = useRoute()
 const loading = ref(true)
 const searchQuery = ref('')
 const statusFilter = ref('')
@@ -211,7 +213,11 @@ const currentPage = ref(1)
 const perPage = ref(10)
 const rows = ref<PartenaireRow[]>([])
 
-watch([searchQuery, statusFilter, categoryFilter, cityFilter, sortBy, perPage], () => {
+const currentView = computed(() => {
+  return route.query.view === 'moderation' ? 'moderation' : 'active'
+})
+
+watch([searchQuery, statusFilter, categoryFilter, cityFilter, sortBy, perPage, currentView], () => {
   currentPage.value = 1
 })
 
@@ -289,6 +295,11 @@ const filteredRows = computed(() => {
   const needle = searchQuery.value.trim().toLowerCase()
 
   return rows.value.filter((row) => {
+    const matchesView = currentView.value === 'moderation'
+      ? row.status !== 'approved'
+      : row.status === 'approved'
+
+    if (!matchesView) return false
     if (statusFilter.value && row.status !== statusFilter.value) return false
     if (categoryFilter.value && !row.categorie.toLowerCase().includes(categoryFilter.value.toLowerCase())) return false
     if (cityFilter.value && row.ville !== cityFilter.value) return false

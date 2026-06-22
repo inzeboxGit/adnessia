@@ -65,8 +65,8 @@
                 <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Entreprise</th>
                 <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Services</th>
                 <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Ville / Zones</th>
-                <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Statut</th>
                 <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Date</th>
+                <th class="px-4 py-3 text-left font-semibold text-gray-600 dark:text-gray-300">Action</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
@@ -78,12 +78,16 @@
                 <td class="px-4 py-3 text-gray-700 dark:text-gray-200">{{ item.entreprise || '-' }}</td>
                 <td class="px-4 py-3 text-gray-700 dark:text-gray-200">{{ displayServices(item.services) }}</td>
                 <td class="px-4 py-3 text-gray-700 dark:text-gray-200">{{ item.ville || '-' }} / {{ displayZones(item.zones) }}</td>
-                <td class="px-4 py-3">
-                  <span class="rounded-full px-2.5 py-1 text-xs font-semibold" :class="statusClass(item.status)">
-                    {{ displayStatus(item.status) }}
-                  </span>
-                </td>
                 <td class="px-4 py-3 text-gray-600 dark:text-gray-300">{{ formatDate(item.createdAt) }}</td>
+                <td class="px-4 py-3">
+                  <router-link
+                    v-if="item.id"
+                    :to="{ name: 'partenaires.pending.detail', params: { id: item.id } }"
+                    class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800"
+                  >
+                    Detail
+                  </router-link>
+                </td>
               </tr>
               <tr v-if="!filteredCandidatures.length">
                 <td colspan="6" class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
@@ -182,21 +186,6 @@ const fullName = (item: PrestataireCandidature) => {
   const last = item.nom?.trim() || ''
   const joined = `${first} ${last}`.trim()
   return joined || '-'
-}
-
-const statusClass = (status?: string) => {
-  const normalized = normalizeStatus(status)
-  if (normalized === 'approved') return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300'
-  if (normalized === 'rejected') return 'bg-rose-100 text-rose-700 dark:bg-rose-500/20 dark:text-rose-300'
-  if (normalized === 'reviewed') return 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300'
-  return 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300'
-}
-
-const displayStatus = (status?: string) => {
-  const normalized = normalizeStatus(status)
-  if (normalized === 'new' || normalized === 'nouveau') return 'nouveau'
-  if (normalized === 'pending') return 'pending'
-  return normalized || '-'
 }
 
 const filteredCandidatures = computed(() => {

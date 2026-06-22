@@ -48,17 +48,17 @@
         <table class="min-w-full divide-y divide-gray-100">
           <thead>
             <tr class="bg-gray-50">
-              <th class="th">Client</th>
-              <th class="th">Telephone</th>
-              <th class="th">Email</th>
-              <th class="th">Reservations</th>
-              <th class="th">Depenses</th>
-              <th class="th">Note</th>
-              <th class="th">Cree le</th>
-              <th class="th">Langue</th>
-              <th class="th">Ville</th>
-              <th class="th">Statut</th>
-              <th class="th">Actions</th>
+              <th class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Client</th>
+              <th class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Telephone</th>
+              <th class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Email</th>
+              <th class="font-medium text-gray-500 text-theme-xs dark:text-gray-400th">Reservations</th>
+              <th class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Depenses</th>
+              <th class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Note</th>
+              <th class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Cree le</th>
+              <th class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Langue</th>
+              <th class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Ville</th>
+              <th class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Statut</th>
+              <th class="font-medium text-gray-500 text-theme-xs dark:text-gray-400">Actions</th>
             </tr>
           </thead>
 
@@ -127,6 +127,10 @@
           <button class="rounded-lg border border-gray-200 px-3 py-1.5 text-sm text-gray-700 disabled:opacity-50" :disabled="page === totalPages" @click="page += 1">Suivant</button>
         </div>
       </div>
+
+      <p v-if="!loading && !error && customers.length === 0" class="mt-4 text-sm text-amber-700">
+        Diagnostic: la page a bien charge, mais la collection Firestore <code>customers</code> a renvoye 0 document.
+      </p>
     </div>
   </admin-layout>
 </template>
@@ -158,6 +162,7 @@ const page = ref(1)
 onMounted(async () => {
   try {
     customers.value = await getCustomers()
+    console.info('[clients] customers loaded:', customers.value.length)
     try {
       customerMetrics.value = await getCustomerMetrics(customers.value)
     } catch {

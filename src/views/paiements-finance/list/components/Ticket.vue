@@ -27,14 +27,20 @@
       <table class="min-w-full divide-y divide-gray-100">
         <thead>
           <tr class="bg-gray-50">
-            <th class="th">ID</th>
-            <th class="th">Client</th>
-            <th class="th">Transaction</th>
-            <th class="th">Methode</th>
-            <th class="th">Statut</th>
-            <th class="th">Date</th>
-            <th class="th">Montant</th>
-            <th class="th">Actions</th>
+            <!-- <th class="th">ID</th> -->
+            <th class="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">Reference
+            </th>
+            <th class=" text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">Client
+            </th>
+            <th class="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">Methode
+            </th>
+            <th class=" text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">Statut
+            </th>
+            <th class="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">Date</th>
+            <th class=" text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">Montant
+            </th>
+            <th class="text-xs font-semibold uppercase tracking-wide text-emerald-600 dark:text-emerald-300">Actions
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-100 bg-white">
@@ -50,19 +56,21 @@
 
           <tr v-for="item in paginatedItems" :key="item.id" class="hover:bg-gray-50/80">
             <td class="px-3 py-3">
-              <div class="flex items-center gap-2">
+              <p class="text-sm font-semibold text-gray-800 dark:text-white">{{ item.reference }}</p>
+              <p class="text-xs text-gray-500">{{ item.description }}</p>
+            </td>
+            <td class="px-3 py-3">
+
+              <!-- <div class="flex items-center gap-2">
                 <div>
                   <p class="text-sm font-semibold text-gray-800 dark:text-white">{{ item.id }}</p>
                   <span v-if="item.reservationType" class="rounded-full border border-gray-200 px-2 py-0.5 text-xs text-gray-600">{{ item.reservationType }}</span>
                 </div>
                 <button class="rounded-md border border-gray-200 px-2 py-1 text-xs text-gray-600" @click="copyText(item.id)">Copier</button>
-              </div>
+              </div> -->
             </td>
             <td class="px-3 py-3 text-sm text-gray-700">{{ item.clientName }}</td>
-            <td class="px-3 py-3">
-              <p class="text-sm font-semibold text-gray-800 dark:text-white">{{ item.reference }}</p>
-              <p class="text-xs text-gray-500">{{ item.description }}</p>
-            </td>
+
             <td class="px-3 py-3">
               <p class="text-sm text-gray-700">{{ item.method }}</p>
               <p class="text-xs text-gray-500">{{ item.category }}</p>

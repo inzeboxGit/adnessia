@@ -162,6 +162,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/reels-videos',
+      name: 'reels-videos',
+      component: () => import('../views/reelsvideos.vue'),
+      meta: {
+        title: 'Reels Videos',
+      },
+    },
+    {
       path: '/listings/:category/:id',
       name: 'listings.detail',
       component: () => import('../views/listings/detail.vue'),

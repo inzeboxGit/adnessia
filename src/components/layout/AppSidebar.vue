@@ -294,8 +294,13 @@ const menuGroups: MenuGroup[] = [
       {
         icon: BoxIcon,
         name: "Listings",
-        subItems: [{ name: "Tous les listings", path: "/listings" }],
+        subItems: [{
+          name: "Tous les listings", path: "/listings"
+        },
+          { name: "Reels (Videos)", path: "/reels-videos" }
+        ]
       },
+
       {
         icon: CalenderIcon,
         name: "Réservations",
@@ -386,11 +391,11 @@ const menuGroups: MenuGroup[] = [
         name: "Notifications push",
         subItems: [{ name: "Campagnes push", path: "/blank" }],
       },
-      {
-        icon: PlugInIcon,
-        name: "Coupons",
-        subItems: [{ name: "Codes promo", path: "/error-404" }],
-      },
+      // {
+      //   icon: PlugInIcon,
+      //   name: "Coupons",
+      //   subItems: [{ name: "Codes promo", path: "/error-404" }],
+      // },
     ],
   },
   {
@@ -411,11 +416,11 @@ const menuGroups: MenuGroup[] = [
         name: "Permissions",
         subItems: [{ name: "Voir permissions", path: "/settings/permissions" }],
       },
-      {
-        icon: TaskIcon,
-        name: "Activité",
-        subItems: [{ name: "Journal d'activité", path: "/videos" }],
-      },
+      // {
+      //   icon: TaskIcon,
+      //   name: "Activité",
+      //   subItems: [{ name: "Journal d'activité", path: "/videos" }],
+      // },
     ],
   },
 ];

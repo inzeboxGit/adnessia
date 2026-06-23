@@ -389,7 +389,7 @@ const menuGroups: MenuGroup[] = [
       {
         icon: BellIcon,
         name: "Notifications push",
-        subItems: [{ name: "Campagnes push", path: "/blank" }],
+        subItems: [{ name: "Campagnes push", path: "/notifications" }],
       },
       // {
       //   icon: PlugInIcon,

@@ -361,6 +361,14 @@ const router = createRouter({
       },
     },
     {
+      path: '/notifications',
+      name: 'notifications',
+      component: () => import('../views/notifications.vue'),
+      meta: {
+        title: 'Notifications Push',
+      },
+    },
+    {
       path: '/blank',
       name: 'Blank',
       component: () => import('../views/Pages/BlankPage.vue'),
